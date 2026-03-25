@@ -7,10 +7,8 @@ load_dotenv()
 hg_token = os.getenv("HG_TOKEN")
 
 model_path = "LorenzoVentrone/SentenceSplitter-MultiLegal-V2"
-token = hg_token # Va bene anche un token di sola lettura (Read)
+token = hg_token 
 
-
-# 2. Passa il token alle funzioni from_pretrained!
 tokenizer = AutoTokenizer.from_pretrained(model_path, token=token)
 model = AutoModelForTokenClassification.from_pretrained(model_path, token=token)
 
