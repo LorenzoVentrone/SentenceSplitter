@@ -124,7 +124,7 @@ jupyter notebook SenteceSplitter.ipynb
 
 ## Hugging Face Model
 
-Model link: `<ADD_HUGGING_FACE_MODEL_LINK_HERE>`
+Model link: [SentenceSplitter-it-en](https://huggingface.co/LorenzoVentrone/SentenceSplitter-it-en)
 
 ## Base Model
 

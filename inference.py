@@ -6,7 +6,7 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification
 load_dotenv()
 hg_token = os.getenv("HG_TOKEN")
 
-model_path = "LorenzoVentrone/SentenceSplitter-MultiLegal-V2"
+model_path = "LorenzoVentrone/SentenceSplitter-it-en"
 token = hg_token 
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, token=token)
