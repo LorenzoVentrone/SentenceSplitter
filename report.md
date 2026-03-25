@@ -123,7 +123,7 @@ Compared to the previous version, the following major updates were introduced:
 
 The trained model is available on Hugging Face Hub.
 
-Model URL: `<ADD_HUGGING_FACE_MODEL_LINK_HERE>`
+Model URL: [LorenzoVentrone/SentenceSplitter-it-en](https://huggingface.co/LorenzoVentrone/SentenceSplitter-it-en)
 
 ## 7. Conclusion
 
