@@ -1,11 +1,21 @@
 import torch
+from dotenv import load_dotenv
+import os
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
-# Load model and tokenizer
-model_path = "/Users/lorenzoventrone/Desktop/NLP/sentenceSplitter/SentenceSplitterModel"
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForTokenClassification.from_pretrained(model_path)
-text_path = "tulu3.txt"
+load_dotenv()
+hg_token = os.getenv("HG_TOKEN")
+
+model_path = "LorenzoVentrone/SentenceSplitter-MultiLegal-V2"
+token = hg_token # Va bene anche un token di sola lettura (Read)
+
+
+# 2. Passa il token alle funzioni from_pretrained!
+tokenizer = AutoTokenizer.from_pretrained(model_path, token=token)
+model = AutoModelForTokenClassification.from_pretrained(model_path, token=token)
+
+print("Modello caricato con successo e pronto all'uso!")
+text_path = ""
 
 # with open(text_path, "r", encoding="utf-8") as f:
 #     secret_text = f.read() 
@@ -36,8 +46,6 @@ print(secret_text)
 # Split the text into paragraphs to avoid Transformer's max token limit (512)
 paragraphs = secret_text.split("\n\n")
 
-# Logic override: acronyms that should never trigger an EOS
-protected_acronyms = ["P.S.", "N.B."]
 final_sentences = []
 
 # Perform inference paragraph by paragraph
@@ -70,8 +78,8 @@ for paragraph in paragraphs:
             original_word = words[word_idx]
             current_sentence.append(original_word)
 
-            # Cut the sentence if model predicts 1 AND word is not protected
-            if predictions[idx] == 1 and original_word.upper() not in protected_acronyms:
+            # Cut the sentence if model predicts 1 
+            if predictions[idx] == 1:
                 final_sentences.append(" ".join(current_sentence))
                 current_sentence = [] # Empty the buffer for the next sentence
 

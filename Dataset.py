@@ -1,58 +1,71 @@
-import tarfile
-from pathlib import Path
 from datasets import Dataset
+from pathlib import Path
+import utils
 
+# --- 1. CONFIGURATION ---
+WINDOW_SIZE = 128
+STRIDE = 100
+WIKI_ARTICLES_PER_LANG = 250 # Number of Wikipedia articles to download per language
 
-dataset_chunks_tokens = []
-dataset_chunks_labels = []
+# --- 4. MAIN EXECUTION PIPELINE ---
+if __name__ == "__main__":
+    print("=== STARTING DATA EXTRACTION PIPELINE ===\n")
 
-window_size = 128
-stride = 100
+    # A. Process Professor's Data
+    prof_tokens, prof_labels = utils.process_tar_dataset(
+        "sent_split_data.tar.gz", WINDOW_SIZE, STRIDE
+    )
 
-percorso_archivio = Path("sent_split_data.tar.gz")
+    # B. Process all MultiLegalSBD JSONL files
+    legal_tokens = []
+    legal_labels = []
+    legal_files = sorted(Path("MultiLegalSBD").glob("*.jsonl"))
 
-with tarfile.open(percorso_archivio, "r:gz") as folder:
-    for file in folder.getmembers():
-        
-        if file.isfile() and file.name.endswith(".sent_split"):
-            print(f"Elaborazione di: {file.name}...")
+    if not legal_files:
+        print("Warning: No JSONL files found in ./MultiLegalSBD")
+    else:
+        print(f"Found {len(legal_files)} legal JSONL files.")
 
-            f = folder.extractfile(file)
-            if f is None:
-                continue
+    for jsonl_file in legal_files:
+        file_tokens, file_labels = utils.process_jsonl_dataset(
+            str(jsonl_file), WINDOW_SIZE, STRIDE
+        )
+        legal_tokens.extend(file_tokens)
+        legal_labels.extend(file_labels)
 
-            text = f.read().decode("utf-8")
+    # C. Process Generalist Data (Wikipedia IT & EN)
+    print("\n--- Processing Generalist Datasets ---")
+    wiki_it_tokens, wiki_it_labels = utils.process_wikipedia_dataset(
+        "20231101.it", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
+    )
+    
+    wiki_en_tokens, wiki_en_labels = utils.process_wikipedia_dataset(
+        "20231101.en", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
+    )
 
-            file_tokens = []
-            file_labels = []
+    # D. Merge all datasets
+    all_tokens = prof_tokens + legal_tokens + wiki_it_tokens + wiki_en_tokens
+    all_labels = prof_labels + legal_labels + wiki_it_labels + wiki_en_labels
 
-            for word in text.split():
-                if "<EOS>" in word:
-                    word_clean = word.replace("<EOS>", "")
-                    if word_clean != "":
-                        file_tokens.append(word_clean)
-                        file_labels.append(1)
-                else:
-                    file_tokens.append(word)
-                    file_labels.append(0)
+    print(f"\n=== MERGE COMPLETE ===")
+    print(f"Professor chunks: {len(prof_tokens)}")
+    print(f"Legal chunks: {len(legal_tokens)}")
+    print(f"Wikipedia chunks: {len(wiki_it_tokens) + len(wiki_en_tokens)}")
+    print(f"Total chunks ready: {len(all_tokens)}")
+    
+    # Optional sanity check
+    assert len(all_tokens) == len(all_labels), "Mismatch between tokens and labels lists!"
 
-            for i in range(0, len(file_tokens), stride):
-                token_chunk = file_tokens[i : i + window_size]
-                label_chunk = file_labels[i : i + window_size]
-                
-                dataset_chunks_tokens.append(token_chunk)
-                dataset_chunks_labels.append(label_chunk)
+    # --- 5. HUGGING FACE DATASET CREATION ---
+    print("\nConverting to Hugging Face Dataset format...")
+    hf_dataset = Dataset.from_dict({
+        "tokens": all_tokens,
+        "ner_tags": all_labels
+    })
 
-print("\n--- Estrazione Completata ---")
-print(f"Totale chunk creati: {len(dataset_chunks_tokens)}")
+    # Save to disk in Arrow/Parquet format
+    output_folder = "unified_training_dataset"
+    hf_dataset.save_to_disk(output_folder)
 
-# 1. Creiamo l'oggetto Dataset nativo di Hugging Face
-hf_dataset = Dataset.from_dict({
-    "tokens": dataset_chunks_tokens,
-    "ner_tags": dataset_chunks_labels
-})
-
-# 2. Salviamo il dataset in una cartella locale
-hf_dataset.save_to_disk("ReadyDataset")
-
-print("Dataset salvato con successo!")
+    print(f"Success! Dataset saved to './{output_folder}'.")
+    print("You can now zip this folder and upload it to Google Colab for training.")
