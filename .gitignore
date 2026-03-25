@@ -1,6 +1,21 @@
+# --- DATASET ---
 sent_split_data
-SentenceSplitterModel.zip
-SentenceSplitEnv 
-SentenceSplitterModel
 sent_split_data.tar.gz
+ReadyDataset
+ReadyDataset.zip
+MultiLegalSBD
+unified_training_dataset.zip
+
+# ---MODELS---
+SentenceSplitterModelV3
+
+# --- ENV---
+SentenceSplitEnv 
+.env
+
+Test
+hf_load.py
+__pycache__
+.DS_Store
+
 
