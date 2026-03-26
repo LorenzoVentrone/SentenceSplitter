@@ -80,16 +80,14 @@ DatasetDict({
 
 ```text
 ├── Dataset.py
+├── eval_results
+    ├── confusion_matrix_sbd.png
 ├── utils.py
 ├── SenteceSplitter.ipynb
 ├── inference.py
 ├── baselineStandard.py
 ├── report.md
-├── sent_split_data.tar.gz
-├── MultiLegalSBD/
-├── ReadyDataset/
-├── unified_training_dataset/
-└── SentenceSplitterModel/
+├── evaluation.md
 ```
 
 ## Setup
