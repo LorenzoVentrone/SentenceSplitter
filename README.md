@@ -122,6 +122,22 @@ jupyter notebook SenteceSplitter.ipynb
 ./SentenceSplitEnv/bin/python inference.py
 ```
 
+## Evaluation Results
+
+Evaluation was run with `evaluation.py` on the test split generated from `unified_training_dataset`.
+
+### Classification Report
+
+| Class | Precision | Recall | F1-score | Support |
+|---|---:|---:|---:|---:|
+| Word (0) | 0.9985 | 0.9983 | 0.9984 | 242929 |
+| Sentence Boundary (1) | 0.9685 | 0.9710 | 0.9697 | 12709 |
+| Accuracy |  |  | 0.9970 | 255638 |
+| Macro Avg | 0.9835 | 0.9847 | 0.9841 | 255638 |
+| Weighted Avg | 0.9970 | 0.9970 | 0.9970 | 255638 |
+
+
+
 ## Hugging Face Model
 
 Model link: [SentenceSplitter-it-en](https://huggingface.co/LorenzoVentrone/SentenceSplitter-it-en)
