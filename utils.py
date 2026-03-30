@@ -13,7 +13,7 @@ except LookupError:
     nltk.download('punkt_tab')
 
 # --- 2. TAR.GZ PROCESSING FUNCTION (Professor's Data) ---
-def process_tar_dataset(file_path, window_size, stride):
+def process_tar_dataset(file_path, window_size, stride, mode):
     """
     Reads a .tar.gz containing .sent_split files, extracts tokens based on <EOS>,
     and applies a sliding window per document.
@@ -30,7 +30,7 @@ def process_tar_dataset(file_path, window_size, stride):
 
     with tarfile.open(archive_path, "r:gz") as folder:
         for member in folder.getmembers():
-            if member.isfile() and member.name.endswith(".sent_split"):
+            if member.isfile() and member.name.endswith(f"{mode}.sent_split"):
                 f = folder.extractfile(member)
                 if f is None:
                     continue

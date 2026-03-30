@@ -2,14 +2,14 @@
 
 ## 1. Introduction
 
-This project builds a multilingual sentence boundary detection system as a token classification task. Instead of relying on regular-expression sentence splitting, the model predicts sentence boundaries directly on tokens, with labels:
+This project builds a multilingual sentence boundary detection system as a token classification task. Instead of relying on regex-based splitting, the model predicts sentence boundaries directly on tokens:
 
 - 0: token is not the end of a sentence
 - 1: token is the end of a sentence
 
-The latest version extends the original pipeline by integrating multiple heterogeneous sources (academic annotation, legal JSONL corpora, and Wikipedia), unifying them into one training dataset, and training a fine-tuned XLM-RoBERTa model for robust behavior on domain-specific and general text.
+The current version uses a unified training pipeline combining academic, legal, and general-domain data, while enforcing train-only filtering for sources that provide split files.
 
-## 2. Dataset Construction (Latest Version)
+## 2. Dataset Construction (Current Version)
 
 Dataset creation is orchestrated by `Dataset.py` and helper functions in `utils.py`.
 
@@ -17,114 +17,126 @@ Dataset creation is orchestrated by `Dataset.py` and helper functions in `utils.
 
 The final unified dataset is built from three sources:
 
-1. Professor dataset from `sent_split_data.tar.gz`
-2. MultiLegalSBD datasets from all `*.jsonl` files in the `MultiLegalSBD` folder
+1. Professor dataset from `sent_split_data.tar.gz` (only `*-train.sent_split` files)
+2. MultiLegalSBD datasets from `MultiLegalSBD/*train.jsonl`
 3. Wikipedia general-domain data:
    - Italian: `20231101.it`
    - English: `20231101.en`
 
 ### 2.2 TAR Processing
 
-For `.sent_split` files:
+For professor `.sent_split` files:
 
-- Tokens are extracted by whitespace split
-- Tokens containing `<EOS>` are cleaned and labeled as `1`
-- All other tokens are labeled as `0`
+- Tokens are extracted with whitespace split
+- Tokens containing `<EOS>` are cleaned and labeled `1`
+- All other tokens are labeled `0`
+- Only files ending with `-train.sent_split` are included
 - Sliding-window chunking is applied per document
 
 ### 2.3 MultiLegalSBD JSONL Processing
 
-The JSONL pipeline was updated for stronger compatibility and cleaner supervision:
+For legal JSONL files:
 
-- Reads records containing `tokens` and `spans`
-- Uses only spans with `label == "Sentence"`
-- Uses `token_end` as sentence boundary target
-- If `token_end` points to whitespace/newline, it backtracks to the last non-whitespace token
-- Skips whitespace-only tokens in the final token stream
-- Applies the same sliding-window chunking strategy used by TAR data
-
-This ensures consistent token/label alignment across legal corpora with tokenized annotations.
+- Input fields: `tokens` and `spans`
+- Only spans with `label == "Sentence"` are used
+- `token_end` is mapped to the last non-whitespace token
+- Whitespace-only tokens are skipped in output
+- Sliding-window chunking is applied
 
 ### 2.4 Wikipedia Integration
 
-Wikipedia articles are downloaded with the Hugging Face datasets library and processed as follows:
+Wikipedia articles are downloaded with Hugging Face datasets and processed as follows:
 
-- Text is split into paragraphs
-- Sentence boundaries are identified with NLTK sentence tokenizer (`sent_tokenize`)
-- Tokens are produced via whitespace split to keep tokenization style consistent across sources
-- Last token of each detected sentence receives label `1`
+- Paragraph split by blank lines
+- Sentence detection with NLTK `sent_tokenize`
+- Tokenization by whitespace split
+- Last token of each sentence gets label `1`
 - Sliding-window chunking is applied
 
-In this version, `WIKI_ARTICLES_PER_LANG` is set to 250.
+Current setting:
+
+- `WIKI_ARTICLES_PER_LANG = 125`
 
 ### 2.5 Unified Dataset Output
 
-After concatenating all sources, the pipeline creates a Hugging Face dataset with fields:
+After concatenation, data is exported as a Hugging Face dataset with:
 
 - `tokens`
 - `ner_tags`
 
-and saves it to:
+Saved folder:
 
 - `unified_training_dataset`
 
-## 3. Training Setup
+## 3. Training Setup (Current Version)
 
-Training is performed in `SenteceSplitter.ipynb` using `xlm-roberta-base` as backbone for token classification (`num_labels = 2`).
+Training is run in `SenteceSplitter.ipynb` with `xlm-roberta-base` as backbone (`num_labels = 2`).
 
-Main steps:
-
-1. Load unified dataset
-2. Build train/test split
-3. Tokenize and align word-level labels with subword tokens
-4. Ignore non-first subword labels via `-100`
-5. Train with Hugging Face Trainer API
-
-### 3.1 Final Split (Latest Run)
+### 3.1 Split Used in Latest Run
 
 ```python
 DatasetDict({
     train: Dataset({
         features: ['tokens', 'ner_tags'],
-        num_rows: 27720
+        num_rows: 19229
     })
     test: Dataset({
         features: ['tokens', 'ner_tags'],
-        num_rows: 3081
+        num_rows: 2137
     })
 })
 ```
 
+Note: this `test` split is used as validation during training.
+
+### 3.2 Training Hyperparameters
+
+```python
+TrainingArguments(
+    output_dir="./risultati_sentence_splitter",
+    num_train_epochs=4,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    learning_rate=2e-5,
+    weight_decay=0.01,
+    logging_strategy="steps",
+    logging_steps=200,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    save_total_limit=2,
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+    greater_is_better=False,
+    warmup_steps=480,
+    seed=42,
+)
+```
+
 ## 4. Inference Pipeline
 
-Inference is executed through `inference.py`.
-
-High-level flow:
+Inference is implemented in `inference.py`:
 
 1. Load tokenizer and fine-tuned model
-2. Split long input text into manageable blocks
+2. Split long input into manageable blocks
 3. Predict token-level EOS labels
 4. Reconstruct final sentences from predicted boundaries
 
-The script is designed to handle long and noisy real-world text while preserving sentence segmentation quality.
+## 5. Version Summary
 
-## 5. Version Updates Summary
+Current version updates:
 
-Compared to the previous version, the following major updates were introduced:
-
-1. Multi-source dataset merging (Professor + MultiLegalSBD + Wikipedia IT/EN)
-2. Automatic discovery of legal JSONL files from `MultiLegalSBD/*.jsonl`
-3. Improved JSONL boundary extraction logic for whitespace-safe `token_end` handling
-4. Unified output dataset folder (`unified_training_dataset`)
-5. Final expanded training split with 27,720 training rows and 3,081 test rows
-6. Model publication to Hugging Face Hub
+1. Train-only professor files (`-train.sent_split`)
+2. Train-only legal files (`*train.jsonl`)
+3. Unified output in `unified_training_dataset`
+4. Current split: 19,229 train / 2,137 validation
+5. Updated training configuration with `warmup_steps=480`
 
 ## 6. Hugging Face Release
 
-The trained model is available on Hugging Face Hub.
+The model can be published to Hugging Face Hub.
 
 Model URL: `<ADD_HUGGING_FACE_MODEL_LINK_HERE>`
 
 ## 7. Conclusion
 
-The latest pipeline version improves both coverage and robustness by combining legal-domain and general-domain data under a single consistent labeling strategy. This update significantly strengthens training diversity and supports better sentence boundary detection across different text genres.
+The current pipeline standardizes data from multiple sources while reducing split leakage risk through train-only source filtering for professor and legal corpora. This setup is intended to improve robustness while preserving a clean evaluation protocol on held-out test sets.

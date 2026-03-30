@@ -13,13 +13,13 @@ if __name__ == "__main__":
 
     # A. Process Professor's Data
     prof_tokens, prof_labels = utils.process_tar_dataset(
-        "sent_split_data.tar.gz", WINDOW_SIZE, STRIDE, "train"
+        "sent_split_data.tar.gz", WINDOW_SIZE, STRIDE, "test"
     )
 
     # B. Process all MultiLegalSBD JSONL files
     legal_tokens = []
     legal_labels = []
-    legal_files = sorted(Path("MultiLegalSBD").rglob("*train.jsonl"))
+    legal_files = sorted(Path("MultiLegalSBD").rglob("*test.jsonl"))
 
     if not legal_files:
         print("Warning: No JSONL files found in ./MultiLegalSBD")
@@ -33,24 +33,24 @@ if __name__ == "__main__":
         legal_tokens.extend(file_tokens)
         legal_labels.extend(file_labels)
 
-    # C. Process Generalist Data (Wikipedia IT & EN)
-    print("\n--- Processing Generalist Datasets ---")
-    wiki_it_tokens, wiki_it_labels = utils.process_wikipedia_dataset(
-        "20231101.it", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
-    )
+    # # C. Process Generalist Data (Wikipedia IT & EN)
+    # print("\n--- Processing Generalist Datasets ---")
+    # wiki_it_tokens, wiki_it_labels = utils.process_wikipedia_dataset(
+    #     "20231101.it", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
+    # )
     
-    wiki_en_tokens, wiki_en_labels = utils.process_wikipedia_dataset(
-        "20231101.en", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
-    )
+    # wiki_en_tokens, wiki_en_labels = utils.process_wikipedia_dataset(
+    #     "20231101.en", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
+    # )
 
     # D. Merge all datasets
-    all_tokens = prof_tokens + legal_tokens + wiki_it_tokens + wiki_en_tokens
-    all_labels = prof_labels + legal_labels + wiki_it_labels + wiki_en_labels
+    all_tokens = prof_tokens + legal_tokens 
+    all_labels = prof_labels + legal_labels 
 
     print(f"\n=== MERGE COMPLETE ===")
     print(f"Professor chunks: {len(prof_tokens)}")
     print(f"Legal chunks: {len(legal_tokens)}")
-    print(f"Wikipedia chunks: {len(wiki_it_tokens) + len(wiki_en_tokens)}")
+    #print(f"Wikipedia chunks: {len(wiki_it_tokens) + len(wiki_en_tokens)}")
     print(f"Total chunks ready: {len(all_tokens)}")
     
     # Optional sanity check
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     })
 
     # Save to disk in Arrow/Parquet format
-    output_folder = "unified_training_dataset"
+    output_folder = "./testset"
     hf_dataset.save_to_disk(output_folder)
 
     print(f"Success! Dataset saved to './{output_folder}'.")

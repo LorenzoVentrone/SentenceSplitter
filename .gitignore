@@ -4,10 +4,25 @@ sent_split_data.tar.gz
 ReadyDataset
 ReadyDataset.zip
 MultiLegalSBD
+unified_training_dataset
 unified_training_dataset.zip
+stress_test.jsonl
+Testset_Luca
+extended_test_dataset
+comprehensive_test_dataset
+adversarial_dataset
+extended_test.jsonl
+testset
+adversarial.jsonl
+adversarial_test.txt
+
+
+
 
 # ---MODELS---
 SentenceSplitterModelV3
+SentenceSplitterModel
+SentenceSplitterModelV4
 
 # --- ENV---
 SentenceSplitEnv 
@@ -17,5 +32,11 @@ Test
 hf_load.py
 __pycache__
 .DS_Store
+.vscode
+
+eval_results
+generate_testset.py
+AdvTestSet.py
+baselineStandard.py
 
 

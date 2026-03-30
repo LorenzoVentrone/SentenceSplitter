@@ -6,8 +6,8 @@ This repository contains a multilingual sentence boundary detection pipeline bui
 
 The dataset pipeline now merges three sources into a single unified training corpus:
 
-1. Professor dataset from `sent_split_data.tar.gz` (`.sent_split` files with `<EOS>` tags)
-2. Legal JSONL datasets from `MultiLegalSBD` (all `.jsonl` files found in the folder)
+1. Professor dataset from `sent_split_data.tar.gz` (only `*-train.sent_split` files with `<EOS>` tags)
+2. Legal JSONL datasets from `MultiLegalSBD` (only `*train.jsonl` files)
 3. General-domain Wikipedia data (Italian and English)
 
 This replaced the previous setup based only on two legal JSONL files.
@@ -25,13 +25,14 @@ All data sources are normalized to the same output schema:
 
 - Each token containing `<EOS>` is cleaned and labeled `1`
 - All other tokens are labeled `0`
+- Only files ending with `-train.sent_split` are included
 - Documents are chunked with sliding window:
    - `WINDOW_SIZE = 128`
    - `STRIDE = 100`
 
 ### 2) MultiLegalSBD JSONL Datasets
 
-`Dataset.py` scans `MultiLegalSBD/*.jsonl` and processes each file through `utils.process_jsonl_dataset(...)`.
+`Dataset.py` scans `MultiLegalSBD` with `*train.jsonl` and processes each file through `utils.process_jsonl_dataset(...)`.
 
 Important handling:
 
@@ -67,13 +68,38 @@ Final split used for training/evaluation:
 DatasetDict({
       train: Dataset({
             features: ['tokens', 'ner_tags'],
-            num_rows: 27720
+            num_rows: 19229
       })
       test: Dataset({
             features: ['tokens', 'ner_tags'],
-            num_rows: 3081
+            num_rows: 2137
       })
 })
+```
+
+## Current Training Configuration
+
+Latest run configuration for this version:
+
+```python
+TrainingArguments(
+    output_dir="./risultati_sentence_splitter",
+    num_train_epochs=4,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    learning_rate=2e-5,
+    weight_decay=0.01,
+    logging_strategy="steps",
+    logging_steps=200,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    save_total_limit=2,
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+    greater_is_better=False,
+    warmup_steps=480,
+    seed=42,
+)
 ```
 
 ## Project Structure
@@ -124,17 +150,7 @@ jupyter notebook SenteceSplitter.ipynb
 
 ## Evaluation Results
 
-Evaluation was run with `evaluation.py` on the test split generated from `unified_training_dataset`.
-
-### Classification Report
-
-| Class | Precision | Recall | F1-score | Support |
-|---|---:|---:|---:|---:|
-| Word (0) | 0.9985 | 0.9983 | 0.9984 | 242929 |
-| Sentence Boundary (1) | 0.9685 | 0.9710 | 0.9697 | 12709 |
-| Accuracy |  |  | 0.9970 | 255638 |
-| Macro Avg | 0.9835 | 0.9847 | 0.9841 | 255638 |
-| Weighted Avg | 0.9970 | 0.9970 | 0.9970 | 255638 |
+TODO
 
 
 
