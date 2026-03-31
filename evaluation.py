@@ -13,17 +13,22 @@ from datasets import load_from_disk
 
 
 # LOAD MODEL AND TOKENIZER
-model_path = "LorenzoVentrone/SentenceSplitter-it-en"
-print(f"Loading model {model_path}...")
+# model_path = "LorenzoVentrone/SentenceSplitter-it-en"
+# print(f"Loading model {model_path}...")
+
+model_path = "SentenceSplitterModelV4"
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForTokenClassification.from_pretrained(model_path)
+
 
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForTokenClassification.from_pretrained(model_path)
 
-dataset = load_from_disk("unified_training_dataset")
+test_dataset = load_from_disk("comprehensive_test_dataset2")
 
 # Create the split 
-dataset = dataset.train_test_split(test_size=0.1, seed=42)
-test_dataset = dataset["test"]
+# dataset = dataset.train_test_split(test_size=0.1, seed=42)
+# test_dataset = dataset["test"]
 
 # Function to tokenize words and align labels 
 def tokenize_and_align_labels(examples):
@@ -91,7 +96,7 @@ true_labels = [l for l in labels.flatten() if l != -100]
 
 # PRINT CLASSIFICATION REPORT
 print("\n" + "="*55)
-print("CLASSIFICATION REPORT")
+print(f"CLASSIFICATION REPORT {model_path}")
 print("="*55)
 report = classification_report(
     true_labels, 
