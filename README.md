@@ -160,9 +160,10 @@ Classification report for SentenceSplitterModel:
 
 
 
-## Hugging Face Model
+## Hugging Face References 
 
-Model link: [SentenceSplitter-it-en](https://huggingface.co/LorenzoVentrone/SentenceSplitter-it-en)
+- Model link: [SentenceSplitter-it-en](https://huggingface.co/LorenzoVentrone/SentenceSplitter-it-en)
+- Dataset link: [LorenzoVentrone/SentenceSplitter-dataset](https://huggingface.co/datasets/LorenzoVentrone/SentenceSplitter-dataset)
 
 ## Base Model
 
