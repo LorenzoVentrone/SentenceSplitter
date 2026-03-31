@@ -146,9 +146,17 @@ jupyter notebook SenteceSplitter.ipynb
 ./SentenceSplitEnv/bin/python inference.py
 ```
 
-## Evaluation Results
+## Evaluation on Adversarial Test Set
 
-TODO
+Classification report for SentenceSplitterModel:
+
+| Class | Precision | Recall | F1-score | Support |
+|---|---:|---:|---:|---:|
+| Word (0) | 0.9992 | 0.9759 | 0.9874 | 1244 |
+| Sentence Boundary (1) | 0.8454 | 0.9939 | 0.9136 | 165 |
+| Accuracy |  |  | 0.9780 | 1409 |
+| Macro avg | 0.9223 | 0.9849 | 0.9505 | 1409 |
+| Weighted avg | 0.9812 | 0.9780 | 0.9788 | 1409 |
 
 
 
