@@ -16,6 +16,9 @@ testset
 adversarial.jsonl
 adversarial_test.txt
 
+# ---HF---
+readmeDataset.md
+readmeHF.md
 
 
 
