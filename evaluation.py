@@ -14,6 +14,7 @@ from datasets import load_from_disk
 
 # LOAD MODEL AND TOKENIZER
 model_path = "LorenzoVentrone/SentenceSplitter-it-en"
+MAX_LENGTH = 128
 print(f"Loading model {model_path}...")
 
 tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -25,13 +26,13 @@ model = AutoModelForTokenClassification.from_pretrained(model_path)
 
 test_dataset = load_from_disk("testset")
 
-# Function to tokenize words and align labels 
+# Function to tokenize words and align labels
 def tokenize_and_align_labels(examples):
     tokenized_inputs = tokenizer(
         examples["tokens"], 
         truncation=True, 
         is_split_into_words=True,
-        max_length=128
+        max_length=MAX_LENGTH
     )
 
     labels = []
