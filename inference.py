@@ -12,7 +12,7 @@ token = hg_token
 tokenizer = AutoTokenizer.from_pretrained(model_path, token=token)
 model = AutoModelForTokenClassification.from_pretrained(model_path, token=token)
 
-print("Modello caricato con successo e pronto all'uso!")
+#Input File loader
 text_path = ""
 
 # with open(text_path, "r", encoding="utf-8") as f:

@@ -2,21 +2,21 @@ from datasets import Dataset
 from pathlib import Path
 import utils
 
-# --- 1. CONFIGURATION ---
+# --- CONFIGURATION ---
 WINDOW_SIZE = 128
 STRIDE = 100
 WIKI_ARTICLES_PER_LANG = 125 # Number of Wikipedia articles to download per language
 
-# --- 4. MAIN EXECUTION PIPELINE ---
+# --- MAIN EXECUTION PIPELINE ---
 if __name__ == "__main__":
     print("=== STARTING DATA EXTRACTION PIPELINE ===\n")
 
-    # A. Process Professor's Data
+    # Process Professor's Data
     prof_tokens, prof_labels = utils.process_tar_dataset(
         "sent_split_data.tar.gz", WINDOW_SIZE, STRIDE, "test"
     )
 
-    # B. Process all MultiLegalSBD JSONL files
+    # Process all MultiLegalSBD JSONL files
     legal_tokens = []
     legal_labels = []
     legal_files = sorted(Path("MultiLegalSBD").rglob("*test.jsonl"))
@@ -33,30 +33,19 @@ if __name__ == "__main__":
         legal_tokens.extend(file_tokens)
         legal_labels.extend(file_labels)
 
-    # # C. Process Generalist Data (Wikipedia IT & EN)
-    # print("\n--- Processing Generalist Datasets ---")
-    # wiki_it_tokens, wiki_it_labels = utils.process_wikipedia_dataset(
-    #     "20231101.it", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
-    # )
-    
-    # wiki_en_tokens, wiki_en_labels = utils.process_wikipedia_dataset(
-    #     "20231101.en", WIKI_ARTICLES_PER_LANG, WINDOW_SIZE, STRIDE
-    # )
-
-    # D. Merge all datasets
+    # Merge all datasets
     all_tokens = prof_tokens + legal_tokens 
     all_labels = prof_labels + legal_labels 
 
     print(f"\n=== MERGE COMPLETE ===")
     print(f"Professor chunks: {len(prof_tokens)}")
     print(f"Legal chunks: {len(legal_tokens)}")
-    #print(f"Wikipedia chunks: {len(wiki_it_tokens) + len(wiki_en_tokens)}")
     print(f"Total chunks ready: {len(all_tokens)}")
     
-    # Optional sanity check
+    # Sanity check
     assert len(all_tokens) == len(all_labels), "Mismatch between tokens and labels lists!"
 
-    # --- 5. HUGGING FACE DATASET CREATION ---
+    # --- HUGGING FACE DATASET CREATION ---
     print("\nConverting to Hugging Face Dataset format...")
     hf_dataset = Dataset.from_dict({
         "tokens": all_tokens,

@@ -38,9 +38,9 @@ __pycache__
 .DS_Store
 .vscode
 
-eval_results
 generate_testset.py
 AdvTestSet.py
 baselineStandard.py
+test_errors.py
 
 

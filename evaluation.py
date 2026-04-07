@@ -13,22 +13,17 @@ from datasets import load_from_disk
 
 
 # LOAD MODEL AND TOKENIZER
-# model_path = "LorenzoVentrone/SentenceSplitter-it-en"
-# print(f"Loading model {model_path}...")
-
-model_path = "SentenceSplitterModelV4"
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForTokenClassification.from_pretrained(model_path)
-
+model_path = "LorenzoVentrone/SentenceSplitter-it-en"
+print(f"Loading model {model_path}...")
 
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForTokenClassification.from_pretrained(model_path)
 
-test_dataset = load_from_disk("comprehensive_test_dataset2")
 
-# Create the split 
-# dataset = dataset.train_test_split(test_size=0.1, seed=42)
-# test_dataset = dataset["test"]
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForTokenClassification.from_pretrained(model_path)
+
+test_dataset = load_from_disk("testset")
 
 # Function to tokenize words and align labels 
 def tokenize_and_align_labels(examples):
@@ -123,6 +118,6 @@ plt.title('Confusion Matrix - SBD XLM-RoBERTa', fontsize=16, pad=20)
 plt.ylabel('Actual Label', fontsize=12)
 plt.xlabel('Predicted Label', fontsize=12)
 
-plot_path = "eval_results/confusion_matrix_sbd.png"
+plot_path = "eval_results/confusion_matrix_sbd(testset).png"
 plt.savefig(plot_path, dpi=300, bbox_inches='tight')
 print(f"Plot successfully saved to: {plot_path}")
