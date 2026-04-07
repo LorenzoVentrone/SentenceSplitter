@@ -15,6 +15,7 @@ extended_test.jsonl
 testset
 adversarial.jsonl
 adversarial_test.txt
+technical_report.tex
 
 # ---HF---
 readmeDataset.md
