@@ -83,7 +83,7 @@ Latest run configuration for this version:
 
 ```python
 TrainingArguments(
-    output_dir="./risultati_sentence_splitter",
+    output_dir="./sentence_splitter_results",
     num_train_epochs=4,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
